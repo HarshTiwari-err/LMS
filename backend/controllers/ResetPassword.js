@@ -32,6 +32,10 @@ const resetPasswordToken = async function (req, res, next) {
         message: "Error in sending mail",
       });
     }
+    return res.status(201).json({
+      success: true,
+      message: "Reset Password token generated",
+    });
   } catch (error) {
     return res.status(500).json({
       success: false,

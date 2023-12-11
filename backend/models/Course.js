@@ -20,13 +20,16 @@ const courseSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
   },
+  courseLanguage: {
+    type: String,
+  },
   courseContent: [
     {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Section",
     },
   ],
-  studentEnrolled: [
+  ratingAndReview: [
     {
       type: mongoose.Schema.Types.ObjectId,
       ref: "RatingAndReview",
@@ -44,11 +47,11 @@ const courseSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "Tag",
   },
-  studentEnrolled: [
+  studentsEnrolled: [
     {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      requried: true, // ! Check
+      // requried: true, // ! Check
     },
   ],
 });

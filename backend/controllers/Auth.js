@@ -41,7 +41,7 @@ const sendOTP = async function (req, res) {
     res.status(200).json({
       success: true,
       message: "OTP sent",
-      otp,
+      otp,  // ! remove it later
     });
   } catch (error) {
     console.log("error in otp", error);
@@ -83,7 +83,7 @@ const signup = async function (req, res, next) {
     }
 
     if (password !== confirmPassword) {
-      return status(400).json({
+      return res.status(400).json({
         success: false,
         message: "Password does not match",
       });
@@ -101,7 +101,7 @@ const signup = async function (req, res, next) {
     // ! find most recent OTP stored for the email
     const recentOtp = await OTP.find({ email })
       .sort({ createdAt: -1 })
-      .limit(-1);
+      .limit(1);
     console.log(recentOtp);
 
     // validate otp
@@ -121,11 +121,11 @@ const signup = async function (req, res, next) {
       gender: null,
       dateOfBirth: null,
       about: null,
-      contact: contact,
+      contact: contact&&null,
     });
     let profileDetails = await profile.save();
 
-    let userobj = new User({
+    let userObj = new User({
       firstName,
       lastName,
       email,
@@ -135,10 +135,10 @@ const signup = async function (req, res, next) {
       image: `https://api.dicebear.com/5.x/initials/svg?seed=${firstName} ${lastName}`,
     });
 
-    let newUser = await userobj.save();
+    let newUser = await userObj.save();
 
     return res.status(200).json({
-      user: newUser,
+      user: newUser,  // ! remove this later on for security 
       message: "Successfully SignUp",
     });
   } catch (error) {
@@ -192,7 +192,7 @@ const login = async function (req, res, next) {
       success: true,
       message: "User logged in successfully",
       token,
-      user,
+      user,  // ! remove this later on
     });
   } catch (error) {
     console.log("Error while login", error);
