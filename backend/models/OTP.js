@@ -17,7 +17,7 @@ const otpSchema = new mongoose.Schema({
   },
 });
 
-async function sendVerificationEmail(email, otp) {
+async function sendOTPMail(email, otp) {
   try {
     const mailResponse = await mailSender(
       email,
@@ -32,7 +32,7 @@ async function sendVerificationEmail(email, otp) {
 }
 
 otpSchema.pre("save", async function (next) {
-  await sendVerificationEmail(this.email, this.otp);
+  await sendOTPMail(this.email, this.otp);
   next();
 });
 

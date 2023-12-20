@@ -7,9 +7,9 @@ const isAuth = async function (req, res, next) {
   try {
     const token =
       req.cookies.token ||
-      req.body ||
-      req.header("Authorisation").replace("Bearer", "");
-
+      req.body.token ||
+      req.header("Authorisation").replace("Bearer ", "");
+    console.log("Token ", token);
     if (!token) {
       return res.status(401).json({
         success: false,
@@ -22,7 +22,7 @@ const isAuth = async function (req, res, next) {
       console.log("decode", decode);
       req.user = decode;
     } catch (error) {
-      res.status(401).json({
+      return res.status(401).json({
         success: false,
         message: "Token in invalid",
       });

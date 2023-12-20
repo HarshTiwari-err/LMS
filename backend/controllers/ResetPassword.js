@@ -1,10 +1,12 @@
 const User = require("../models/User");
 const mailSender = require("../utils/mailSender");
 const jwt = require("jsonwebtoken");
+const bcrypt = require("bcrypt");
 // ! resetPasswordToken
 const resetPasswordToken = async function (req, res, next) {
   try {
     const { email } = req.body;
+    console.log("Email", email);
     if (!email) {
       return res.status(401).json({
         success: false,
@@ -35,6 +37,7 @@ const resetPasswordToken = async function (req, res, next) {
     return res.status(201).json({
       success: true,
       message: "Reset Password token generated",
+      token,
     });
   } catch (error) {
     return res.status(500).json({
@@ -48,7 +51,6 @@ const resetPasswordToken = async function (req, res, next) {
 const resetPassword = async function (req, res, next) {
   try {
     const { newPassword, confirmNewPassword, token } = req.body;
-
     if (newPassword !== confirmNewPassword) {
       return res.status(401).json({
         success: false,
@@ -73,7 +75,9 @@ const resetPassword = async function (req, res, next) {
         message: "Token expired",
       });
     }
+    console.log("Reaching here?",);
     const hashedPassword = await bcrypt.hash(newPassword, 10);
+    console.log(hashedPassword);
     const { _id } = decode;
     const updateUser = await User.findByIdAndUpdate(
       _id,

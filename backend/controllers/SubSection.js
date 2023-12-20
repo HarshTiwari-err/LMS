@@ -1,25 +1,34 @@
 const Section = require("../models/Section");
 const SubSection = require("../models/SubSection");
-const uploadToCloudinary = require("../utils/uploadCloudinary");
+const { uploadImageToCloudinary } = require("../utils/cloudinary");
 
 const createSubSection = async function (req, res, next) {
   try {
     // fetch the required data
+    console.log(req.body);
     const { sectionId, title, description, timeDuration } = req.body;
     // extract file/video
-    const video = req.files.videofile;
+    // console.log(sectionId,title,description,timeDuration);
+    const localVideoPath = req.file.path;
     // validate data
-    if (!sectionId || !title || !description || !timeDuration || !video) {
+    if (!sectionId || !title || !description || !timeDuration) {
       return res.status(400).json({
         status: false,
         message: "All fields required",
       });
     }
     // upload to cloudinary and get response.url
-    const uploadDetails = await uploadToCloudinary(
-      video,
-      process.env.FOLDER_NAME
-    );
+    console.log("Upload");
+    const uploadDetails = await uploadImageToCloudinary(localVideoPath);
+    console.log(uploadDetails)
+    if (!uploadDetails) {
+      console.log("In if")
+      return res.status(403).json({
+        success: false,
+        message: "Invalid credetials",
+      });
+    }
+    console.log("Uploaded");
     // create a subsection
     const subSectionDetails = new SubSection({
       title,
@@ -40,7 +49,7 @@ const createSubSection = async function (req, res, next) {
     );
     // return response
     return res.status(200).json({
-      success: false,
+      success: true,
       message: "Sub Section created successfully",
     });
   } catch (error) {

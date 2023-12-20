@@ -4,6 +4,7 @@ const Section = require("../models/Section");
 // create Section
 const createSection = async function (req, res, next) {
   try {
+    //! make sure courseId is not length > specific amount as it is breaking the code
     const { sectionName, courseId } = req.body;
 
     if (!sectionName || !courseId) {
@@ -12,39 +13,49 @@ const createSection = async function (req, res, next) {
         message: "Missing required fields",
       });
     }
-
+    // ! check if course is present or not
+    console.log("till here");
+    const checkCourse = await Course.findById(courseId);
+    console.log("checkCourse", checkCourse);
+    if (!checkCourse) {
+      return res.json({
+        success: false,
+        message: "Not a valid course",
+      });
+    }
     const section = new Section({
       sectionName,
     });
     const newSection = await section.save();
 
     const updateCourseContent = await Course.findByIdAndUpdate(
-      { _id: courseId },
+      courseId,
       {
         $push: {
           courseContent: newSection._id,
         },
       },
       { new: true }
-    )
-      .populate({
-        path: "courseContent",
-        select: "sectionName subSection",
-        populate: {
-          path: "subSection",
-          model: "Section",
-          populate: {
-            path: "subSection",
-            model: "subSection",
-          },
-        },
-      })
-      .exec();
+    );
+    // .populate({
+    //   path: "courseContent",
+    //   select: "sectionName subSection",
+    //   populate: {
+    //     path: "subSection",
+    //     model: "Section",
+    //     populate: {
+    //       path: "subSection",
+    //       model: "subSection",
+    //     },
+    //   },
+    // })
+    // .exec();
 
     // use populate to replace section/subsection both in the updatedCourseContent
     return res.status(201).json({
       success: true,
       message: "Empty Section created",
+      sectionId: newSection._id,
       updateCourseContent, // !
     });
   } catch (error) {
@@ -103,9 +114,9 @@ const deleteSection = async function (req, res, next) {
 
     // ! Todo : Implement deleting corresponding subsection and their cloudinary media associated with it
     return res.status(200).json({
-        success:true,
-        message:"Section deleted successfully"
-    })
+      success: true,
+      message: "Section deleted successfully",
+    });
   } catch (error) {
     console.log("Error while deleting the section");
     return res.status(500).json({

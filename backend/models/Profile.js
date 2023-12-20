@@ -4,6 +4,12 @@ const profileSchema = new mongoose.Schema({
   gender: {
     type: String,
   },
+  displayName: {
+    type: String,
+  },
+  profession: {
+    type: String,
+  },
   dateOfBirth: {
     type: String,
   },

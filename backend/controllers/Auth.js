@@ -2,6 +2,7 @@ const User = require("../models/User");
 const OTP = require("../models/OTP");
 const Profile = require("../models/Profile");
 const otpGenerator = require("otp-generator");
+const mailSender = require("../utils/mailSender");
 
 // ! sendOTP
 
@@ -31,17 +32,17 @@ const sendOTP = async function (req, res) {
     }
 
     const otpPayload = { email, otp };
-
+    console.log("Otp payload", otpPayload);
     // create an entry in db
     const createOTP = new OTP(otpPayload);
     const otpbody = await createOTP.save();
 
-    console.log(otpbody);
+    // console.log(otpbody);
 
     res.status(200).json({
       success: true,
       message: "OTP sent",
-      otp,  // ! remove it later
+      otp, // ! remove it later
     });
   } catch (error) {
     console.log("error in otp", error);
@@ -54,7 +55,7 @@ const sendOTP = async function (req, res) {
 
 // ! signup
 
-const signup = async function (req, res, next) {
+const signUp = async function (req, res, next) {
   try {
     const {
       firstName,
@@ -99,11 +100,10 @@ const signup = async function (req, res, next) {
     }
 
     // ! find most recent OTP stored for the email
-    const recentOtp = await OTP.find({ email })
+    const recentOtp = await OTP.findOne({ email: email })
       .sort({ createdAt: -1 })
       .limit(1);
-    console.log(recentOtp);
-
+    console.log("this is recent otp ", recentOtp);
     // validate otp
     if (recentOtp.otp.length === 0) {
       return res.status(400).json({
@@ -121,7 +121,7 @@ const signup = async function (req, res, next) {
       gender: null,
       dateOfBirth: null,
       about: null,
-      contact: contact&&null,
+      contact: contact && null,
     });
     let profileDetails = await profile.save();
 
@@ -138,11 +138,11 @@ const signup = async function (req, res, next) {
     let newUser = await userObj.save();
 
     return res.status(200).json({
-      user: newUser,  // ! remove this later on for security 
+      user: newUser, // ! remove this later on for security
       message: "Successfully SignUp",
     });
   } catch (error) {
-    console.log(error);
+    console.log("error", error);
     return res.status(500).json({
       success: false,
       message: "Signup error",
@@ -180,9 +180,7 @@ const login = async function (req, res, next) {
         message: "Invalid password", // ! make it invalid email or password later for security
       });
     }
-
-    const token = user.generateJWT("2h");
-
+    const token =  user.generateJWT("2h");
     const options = {
       expires: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
       httpOnly: true,
@@ -191,8 +189,8 @@ const login = async function (req, res, next) {
     return res.cookie("token", token, options).status(200).json({
       success: true,
       message: "User logged in successfully",
-      token,
-      user,  // ! remove this later on
+      // token,
+      user, // ! remove this later on
     });
   } catch (error) {
     console.log("Error while login", error);
@@ -205,11 +203,10 @@ const login = async function (req, res, next) {
 
 // ! changePassword
 
-const mailSender = require("../utils/mailSender");
 const changePassword = async function (req, res, next) {
   try {
     // get data from req which is updated from middleware before this auth
-    const { email, _id } = req.user;  // ! make sure it is from decode in req.user
+    const { email, _id } = req.user; // ! make sure it is from decode in req.user
     // get oldPassword, newPassword, confirmNewPassword
     const { oldPassword, newPassword, confirmNewPassword } = req.body;
     // validation
@@ -228,6 +225,7 @@ const changePassword = async function (req, res, next) {
       });
     }
     // update password in db
+    // ! make sure you update the hash password
     const updatedUserPass = await User.findByIdAndUpdate(
       _id,
       { password: newPassword },
@@ -265,4 +263,4 @@ const changePassword = async function (req, res, next) {
   }
 };
 
-module.exports = { sendOTP, signup, login, changePassword };
+module.exports = { sendOTP, signUp, login, changePassword };

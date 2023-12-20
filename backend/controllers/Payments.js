@@ -91,7 +91,7 @@ const capturePayment = async function (req, res, next) {
 
 const verifySignature = async function (req, res, next) {
   try {
-    const webhookSecret = "1234567"; // process.env.webhooksecret
+    const webhookSecret = process.env.WEBHOOK_SECRET // process.env.webhooksecret
     const signature = req.headers["x-razorpay-signature"]; // ye razorpay se hash hoke aya ha
 
     // ! convert webhook secret to digest
